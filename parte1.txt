@@ -1,0 +1,78 @@
+#include "GFButton.h"
+#include <LiquidCrystal.h>
+
+//LiquidCrystal(rs, en, d4, d5, d6, d7)
+LiquidCrystal lcd(7,6,5,4,3,2);
+/*#define I2C_ADDR    0x27
+#define LCD_COLUMNS 16
+#define LCD_LINES   2
+
+LiquidCrystal_I2C lcd(I2C_ADDR, LCD_COLUMNS, LCD_LINES); */
+
+int pinBotonON=8;
+int pinBotonOFF=9;
+
+String inputString="";
+bool stringComplete=false;
+
+GFButton boton1(pinBotonON);
+GFButton boton2(pinBotonOFF);
+
+
+void setup() {
+  /*lcd.init();
+  lcd.backlight();
+  lcd.setCursor(0, 0);*/
+
+  inputString.reserve(200);
+  pinMode(pinBotonON, INPUT);
+  pinMode(pinBotonOFF, INPUT);
+  boton1.setPressHandler(botonON_pulsado);
+  boton2.setPressHandler(botonOFF_pulsado);
+  Serial.begin(9600);
+  lcd.begin(16,2);
+  lcd.setCursor(0,0);
+  lcd.print("Automatización");
+  lcd.setCursor(0,1);
+  lcd.print("para todos");
+  delay(2000);
+}
+
+void loop() {
+ boton1.process();
+ boton2.process();
+
+ if (stringComplete){
+  if (inputString=="LED1ON_"){
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("LED 1-> ON");
+  }
+  else if (inputString=="LED1OFF_"){
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("LED 1-> OFF");
+  }
+
+  inputString="";
+  stringComplete=false;
+ }
+}
+
+void botonON_pulsado(GFButton & btn){
+  Serial.print("LED1ON_");
+}
+
+void botonOFF_pulsado(GFButton & btn){
+  Serial.print("LED1OFF_");
+}
+
+void serialEvent(){
+  while(Serial.available()){
+    char inChar=(char)Serial.read();
+    inputString += inChar;
+    if (inChar == "_"){
+      stringComplete=true;
+    }
+  }
+}
